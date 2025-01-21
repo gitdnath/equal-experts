@@ -1,31 +1,45 @@
-name: Run Tests
+name: Run Tests in Docker
 
 on:
   push:
     branches:
-      - main    # Trigger on push to the 'main' branch
+      - main
   pull_request:
     branches:
-      - main    # Trigger on pull request to 'main' branch
+      - main
 
 jobs:
   test:
-    runs-on: ubuntu-latest  # The environment to run the tests in
+    runs-on: ubuntu-latest  # Use Ubuntu as the runner environment
+
+    services:
+      docker:
+        image: docker:19.03.12  # Specify a Docker image for Docker setup
+        options: --privileged  # Allow privileged mode for Docker
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3  # Check out the repository code
+    - name: Checkout code
+      uses: actions/checkout@v2  # Check out your repository code
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'  # Specify the version of Python
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v1  # Set up Docker Buildx for multi-platform builds
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r dependencies.txt  # Install dependencies from your file
+    - name: Build Docker container
+      run: |
+        docker build -t my-app .  # Build your Docker image
 
-      - name: Run tests
-        run: |
-          python -m unittest test-api.py  # Run your test file
+    - name: Run app in Docker container
+      run: |
+        docker run -d --name my-app-container my-app  # Run the app inside the container
 
+    - name: Install dependencies inside Docker container
+      run: |
+        docker exec my-app-container pip install -r dependencies.txt  # Install any Python dependencies
+
+    - name: Run tests inside Docker container
+      run: |
+        docker exec my-app-container python -m unittest test-api.py  # Run the tests inside the container
+
+    - name: Stop and remove Docker container
+      run: |
+        docker rm -f my-app-container  # Clean up by stopping and removing the container
