@@ -75,9 +75,9 @@ pipeline {
                         export AWS_SESSION_TOKEN_DEV=$AWS_SESSION_TOKEN_DEV
 
                         aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
-                        aws eks --region ap-southeast-2 describe-cluster --name HRV-DP-CLUSTER-DEV
+                        // aws eks --region ap-southeast-2 describe-cluster --name HRV-DP-CLUSTER-DEV
 
-                        kubectl apply -f deployment-EKS.yaml
+                        kubectl apply -f deployment-EKS.yaml --v=9
                     """
                 }
             }
