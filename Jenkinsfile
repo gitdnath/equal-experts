@@ -70,8 +70,14 @@ pipeline {
             steps {
                 script {
                     sh """
+                        export AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV
+                        export AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV
+                        export AWS_SESSION_TOKEN_DEV=$AWS_SESSION_TOKEN_DEV
+
                         aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
-                        kubectl apply -f deployment-EKS.yaml
+                        aws eks --region ap-southeast-2 describe-cluster --name HRV-DP-CLUSTER-DEV
+
+                        kubectl apply -f deployment-EKS.yaml --v=9
                     """
                 }
             }
