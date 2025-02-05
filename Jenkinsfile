@@ -8,7 +8,12 @@ pipeline {
         IMAGE_TAG = "latest"
         AWS_ACCOUNT_ID = "239358602555"
         ECR_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
-    }
+
+        // Explicitly use the SSO assumed role session
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        AWS_SESSION_TOKEN = credentials('AWS_SESSION_TOKEN')
+    }    
 
     stages {
         stage('Checkout Code') {
@@ -21,6 +26,10 @@ pipeline {
             steps {
                 script {
                     sh """
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                        export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
+
                         aws ecr get-login-password --region $AWS_REGION | \
                         docker login --username AWS --password-stdin $ECR_URI
                     """
@@ -40,6 +49,10 @@ pipeline {
             steps {
                 script {
                     sh """
+                        export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                        export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                        export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN
+
                         docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
                         docker push $ECR_URI:$IMAGE_TAG
                     """
