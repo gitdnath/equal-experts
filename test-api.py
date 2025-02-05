@@ -52,8 +52,14 @@ class TestWebServerAPI(unittest.TestCase):
         """
         response = requests.get(f"{self.BASE_URL}/")
 
-        # Validate the HTTP status code for a missing username
-        self.assertEqual(response.status_code, 404)
+        # Validate the HTTP status code for a missing username, added a home page so it doesn't return and error annymore
+        # self.assertEqual(response.status_code, 404)
+
+        # Check if the status code is 200 (successful request)
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the heading contains the correct text
+        self.assertIn("<h1>Welcome to the GitHub Gist Fetcher!</h1>", response.text)        
 
 # Run the tests
 if __name__ == "__main__":
