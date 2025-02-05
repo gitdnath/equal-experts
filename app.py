@@ -1,10 +1,37 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template_string
 import requests
 
 app = Flask(__name__)
 
 # Base URL for GitHub API
 GITHUB_API_BASE_URL = "https://api.github.com/users"
+
+@app.route('/')
+def welcome():
+    """
+    Display a welcome message on a green background when the base URL is accessed.
+    """
+    html_content = """
+    <html>
+    <head>
+        <title>Welcome</title>
+        <style>
+            body {
+                background-color: purple;
+                color: white;
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 50px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Welcome to the GitHub Gist Fetcher!</h1>
+        <p>Enter a GitHub username in the URL to get their public gists.</p>
+    </body>
+    </html>
+    """
+    return render_template_string(html_content)
 
 @app.route('/<username>', methods=['GET'])
 def get_user_gists(username):

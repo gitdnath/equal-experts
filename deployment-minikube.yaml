@@ -15,8 +15,8 @@ spec:
       containers:
       - name: my-app
         image: my-app:latest #use this to deploy to minikube cluster
-        #image: localhost:5000/my-app:latest
-        imagePullPolicy: Never
+        #image: localhost:5000/my-app:latest #this is not working
+        imagePullPolicy: Never #use this when deploying to minikube
         ports:
         - containerPort: 8080
 ---
@@ -32,4 +32,3 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 8080
-

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: den-app
+  labels:
+    app: den-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: den-app
+  template:
+    metadata:
+      labels:
+        app: den-app
+    spec:
+      containers:
+        - name: den-app
+          image: 239358602555.dkr.ecr.ap-southeast-2.amazonaws.com/den-app-repository:latest
+          ports:
+            - containerPort: 8080
+---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: den-app-service
+# spec:
+#   selector:
+#     app: den-app
+#   ports:
+#     - protocol: TCP
+#       port: 80
+#       targetPort: 8080
+#   type: LoadBalancer
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: den-app-service
+spec:
+  type: NodePort  # Change from LoadBalancer to NodePort
+  selector:
+    app: den-app
+  ports:
+    - protocol: TCP
+      port: 80        # Internal service port
+      targetPort: 8080 # Container port
+      nodePort: 32000  # Optional: Assign a fixed NodePort (30000-32767)
