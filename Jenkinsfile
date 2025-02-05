@@ -77,7 +77,7 @@ pipeline {
                         aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
                         // aws eks --region ap-southeast-2 describe-cluster --name HRV-DP-CLUSTER-DEV
 
-                        kubectl apply -f deployment-EKS.yaml --v=9
+                        kubectl apply -f deployment-EKS.yaml
                     """
                 }
             }
