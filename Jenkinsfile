@@ -13,12 +13,6 @@ pipeline {
         AWS_ACCESS_KEY_ID_SHARED = credentials('AWS_ACCESS_KEY_ID_SHARED')
         AWS_SECRET_ACCESS_KEY_SHARED = credentials('AWS_SECRET_ACCESS_KEY_SHARED')
         AWS_SESSION_TOKEN_SHARED = credentials('AWS_SESSION_TOKEN_SHARED')
-
-        // Explicitly use the SSO assumed role session
-        AWS_ACCESS_KEY_ID_DEV = credentials('AWS_ACCESS_KEY_ID_DEV')
-        AWS_SECRET_ACCESS_KEY_DEV = credentials('AWS_SECRET_ACCESS_KEY_DEV')
-        AWS_SESSION_TOKEN_DEV = credentials('AWS_SESSION_TOKEN_DEV')
-
     }    
 
     stages {
