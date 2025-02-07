@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'amazon/aws-cli'  // Use AWS CLI inside container
+            image 'jenkins/jenkins'  // Use AWS CLI inside container
             args '-e AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV -e AWS_SESSION_TOKEN_DEV -e AWS_DEFAULT_REGION_DEV'
         }
     }
