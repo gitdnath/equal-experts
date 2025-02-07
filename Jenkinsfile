@@ -18,7 +18,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', credentialsId: 'id_rsa_github', url: 'git@github.com:gitdnath/equal-experts.git'
+                git branch: 'main', credentialsId: 'id_rsa', url: 'git@github.com:gitdnath/equal-experts.git'
             }
         }
 

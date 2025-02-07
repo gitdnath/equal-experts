@@ -1,0 +1,85 @@
+pipeline {
+    agent {
+        docker {
+            image 'amazon/aws-cli'  // Use AWS CLI inside container
+            args '-e AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV -e AWS_SESSION_TOKEN_DEV -e AWS_DEFAULT_REGION_DEV'
+        }
+    }
+
+    environment {
+        AWS_ACCESS_KEY_ID_DEV     = credentials('AWS_ACCESS_KEY_ID_DEV')
+        AWS_SECRET_ACCESS_KEY_DEV = credentials('AWS_SECRET_ACCESS_KEY_DEV')
+        AWS_SESSION_TOKEN_DEV     = credentials('AWS_SESSION_TOKEN_DEV')
+        AWS_DEFAULT_REGION_DEV    = 'ap-southeast-2'
+
+        AWS_REGION        = "ap-southeast-2"
+        EKS_CLUSTER_NAME  = "HRV-DP-CLUSTER-DEV"
+        ECR_REPO          = "den-app-repository"
+        IMAGE_TAG         = "latest"
+        AWS_ACCOUNT_ID    = "239358602555"
+        ECR_URI          = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
+
+        // Shared AWS Credentials for ECR & EKS
+        AWS_ACCESS_KEY_ID_SHARED     = credentials('AWS_ACCESS_KEY_ID_SHARED')
+        AWS_SECRET_ACCESS_KEY_SHARED = credentials('AWS_SECRET_ACCESS_KEY_SHARED')
+        AWS_SESSION_TOKEN_SHARED     = credentials('AWS_SESSION_TOKEN_SHARED')
+    }
+
+    stages {
+        stage('Verify AWS Credentials') {
+            steps {
+                sh 'aws sts get-caller-identity'
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main', credentialsId: 'id_rsa', url: 'git@github.com:gitdnath/equal-experts.git'
+            }
+        }
+
+        stage('Login to AWS ECR') {
+            steps {
+                sh """
+                    aws ecr get-login-password --region ${AWS_REGION} | \
+                    docker login --username AWS --password-stdin ${ECR_URI}
+                """
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${ECR_REPO}:${IMAGE_TAG} ."
+            }
+        }
+
+        stage('Tag & Push to AWS ECR') {
+            steps {
+                sh """
+                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_URI}:${IMAGE_TAG}
+                    docker push ${ECR_URI}:${IMAGE_TAG}
+                """
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                sh """
+                    aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME}
+
+                    kubectl delete -f deployment-EKS.yaml || true  # Ignore error if not found
+                    kubectl apply -f deployment-EKS.yaml
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment successful!"
+        }
+        failure {
+            echo "❌ Deployment failed! Check logs."
+        }
+    }
+}
