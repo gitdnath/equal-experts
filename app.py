@@ -17,8 +17,8 @@ def welcome():
         <title>Welcome</title>
         <style>
             body {
-                background-color: black;
-                color: white;
+                background-color: white;
+                color: black;
                 font-family: Arial, sans-serif;
                 text-align: center;
                 padding: 50px;
