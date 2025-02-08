@@ -53,17 +53,6 @@ pipeline {
 
         stage('Login to AWS ECR') {
             steps {
-                // script {
-                //     sh """
-                //         export AWS_ACCESS_KEY_ID_SHARED=$AWS_ACCESS_KEY_ID_SHARED
-                //         export AWS_SECRET_ACCESS_KEY_SHARED=$AWS_SECRET_ACCESS_KEY_SHARED
-                //         export AWS_SESSION_TOKEN_SHARED=$AWS_SESSION_TOKEN_SHARED
-
-                //         aws ecr get-login-password --region $AWS_REGION | \
-                //         docker login --username AWS --password-stdin $ECR_URI
-                //     """
-                // }
-
                 script {
                     withEnv([
                         "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_SHARED}",
@@ -91,28 +80,38 @@ pipeline {
         stage('Tag & Push to AWS ECR') {
             steps {
                 script {
-                    sh """
-                        export AWS_ACCESS_KEY_ID_SHARED=$AWS_ACCESS_KEY_ID_SHARED
-                        export AWS_SECRET_ACCESS_KEY_SHARED=$AWS_SECRET_ACCESS_KEY_SHARED
-                        export AWS_SESSION_TOKEN_SHARED=$AWS_SESSION_TOKEN_SHARED
-
+                    withEnv([
+                        "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_SHARED}",
+                        "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_SHARED}",
+                        "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN_SHARED}",
+                        "AWS_REGION=${AWS_REGION}"
+                    ]) {
+                        sh '''
                         docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
                         docker push $ECR_URI:$IMAGE_TAG
-                    """
-                }
+                        '''
+                    }
+                }                
             }
         }
 
         stage('Deploy to EKS') {
             steps {
                 script {
-                    sh """
+                    withEnv([
+                        "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEV}",
+                        "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEV}",
+                        "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN_DEV}",
+                        "AWS_REGION=${AWS_REGION}"
+                    ]) {
+                        sh '''
                         aws eks --region $AWS_REGION update-kubeconfig --name $EKS_CLUSTER_NAME
 
                         kubectl delete -f deployment-EKS.yaml
                         kubectl apply -f deployment-EKS.yaml
-                    """
-                }
+                        '''
+                    }
+                }                   
             }
         }
     }
