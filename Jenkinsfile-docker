@@ -53,24 +53,6 @@ pipeline {
             }
         }
 
-        // stage('Login to AWS ECR') {
-        //     steps {
-        //         script {
-        //             withEnv([
-        //                 "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_SHARED}",
-        //                 "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_SHARED}",
-        //                 "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN_SHARED}",
-        //                 "AWS_REGION=${AWS_REGION}"
-        //             ]) {
-        //                 sh '''
-        //                 aws ecr get-login-password --region $AWS_REGION | \
-        //                 docker login --username AWS --password-stdin $ECR_URI
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
-
         stage('Build Docker Image') {
             steps {
                 script {
