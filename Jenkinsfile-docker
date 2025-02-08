@@ -27,17 +27,35 @@ pipeline {
     }
 
     stages {
+        // stage('Verify AWS Credentials') {
+        //     steps {
+        //         sh """
+        //             export AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV
+        //             export AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV
+        //             export AWS_SESSION_TOKEN_DEV=$AWS_SESSION_TOKEN_DEV
+
+        //             aws sts get-caller-identity
+        //         """
+        //     }
+        // }
+
         stage('Verify AWS Credentials') {
             steps {
-                sh """
-                    export AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID_DEV
-                    export AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY_DEV
-                    export AWS_SESSION_TOKEN_DEV=$AWS_SESSION_TOKEN_DEV
-
-                    aws sts get-caller-identity
-                """
+                script {
+                    withEnv([
+                        "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEV}",
+                        "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEV}",
+                        "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN_DEV}",
+                        "AWS_REGION=${AWS_SESSION_TOKEN_DEV}"
+                    ]) {
+                        sh '''
+                        echo "Testing AWS Credentials..."
+                        aws sts get-caller-identity
+                        '''
+                    }
+                }
             }
-        }
+        }        
 
         stage('Checkout Code') {
             steps {
