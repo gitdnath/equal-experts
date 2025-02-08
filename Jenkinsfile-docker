@@ -53,7 +53,33 @@ pipeline {
             }
         }
 
-        stage('Login to AWS ECR') {
+        // stage('Login to AWS ECR') {
+        //     steps {
+        //         script {
+        //             withEnv([
+        //                 "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_SHARED}",
+        //                 "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_SHARED}",
+        //                 "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN_SHARED}",
+        //                 "AWS_REGION=${AWS_REGION}"
+        //             ]) {
+        //                 sh '''
+        //                 aws ecr get-login-password --region $AWS_REGION | \
+        //                 docker login --username AWS --password-stdin $ECR_URI
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t $ECR_REPO:$IMAGE_TAG ."
+                }
+            }
+        }
+
+        stage('Login, Tag & Push to AWS ECR') {
             steps {
                 script {
                     withEnv([
@@ -65,30 +91,7 @@ pipeline {
                         sh '''
                         aws ecr get-login-password --region $AWS_REGION | \
                         docker login --username AWS --password-stdin $ECR_URI
-                        '''
-                    }
-                }
-            }
-        }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh "docker build -t $ECR_REPO:$IMAGE_TAG ."
-                }
-            }
-        }
-
-        stage('Tag & Push to AWS ECR') {
-            steps {
-                script {
-                    withEnv([
-                        "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_SHARED}",
-                        "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_SHARED}",
-                        "AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN_SHARED}",
-                        "AWS_REGION=${AWS_REGION}"
-                    ]) {
-                        sh '''
                         docker tag $ECR_REPO:$IMAGE_TAG $ECR_URI:$IMAGE_TAG
                         docker push $ECR_URI:$IMAGE_TAG
                         '''
