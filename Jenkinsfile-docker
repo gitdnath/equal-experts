@@ -1,23 +1,25 @@
 pipeline {
-    agent {
-        any {
-            image 'jenkins/jenkins'  // Use AWS CLI inside container
-            args '-e AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV -e AWS_SESSION_TOKEN_DEV -e AWS_DEFAULT_REGION_DEV'
-        }
-    }
+    agent any
+
+    // agent {
+    //     any {
+    //         image 'jenkins/jenkins'  // Use AWS CLI inside container
+    //         args '-e AWS_ACCESS_KEY_ID_DEV -e AWS_SECRET_ACCESS_KEY_DEV -e AWS_SESSION_TOKEN_DEV -e AWS_DEFAULT_REGION_DEV'
+    //     }
+    // }
 
     environment {
-        // Dev account credentials for EKS
-        AWS_ACCESS_KEY_ID_DEV     = credentials('AWS_ACCESS_KEY_ID_DEV')
-        AWS_SECRET_ACCESS_KEY_DEV = credentials('AWS_SECRET_ACCESS_KEY_DEV')
-        AWS_SESSION_TOKEN_DEV     = credentials('AWS_SESSION_TOKEN_DEV')
-
         AWS_REGION        = "ap-southeast-2"
         EKS_CLUSTER_NAME  = "HRV-DP-CLUSTER-DEV"
         ECR_REPO          = "den-app-repository"
         IMAGE_TAG         = "latest"
         AWS_ACCOUNT_ID    = "239358602555"
-        ECR_URI          = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
+        ECR_URI           = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
+
+        // Dev account credentials for EKS
+        AWS_ACCESS_KEY_ID_DEV     = credentials('AWS_ACCESS_KEY_ID_DEV')
+        AWS_SECRET_ACCESS_KEY_DEV = credentials('AWS_SECRET_ACCESS_KEY_DEV')
+        AWS_SESSION_TOKEN_DEV     = credentials('AWS_SESSION_TOKEN_DEV')
 
         // Shared Services Account AWS Credentials for ECR
         AWS_ACCESS_KEY_ID_SHARED     = credentials('AWS_ACCESS_KEY_ID_SHARED')
